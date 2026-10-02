@@ -80,6 +80,31 @@ document.addEventListener("DOMContentLoaded", () => {
   resumeData.experience.forEach((exp, index) => {
     const card = document.createElement("div");
     card.className = "exp-card";
+
+    let slideshowHTML = "";
+    if (exp.images && exp.images.length > 0) {
+      const slides = exp.images.map((img, i) => `
+        <div class="slide ${i === 0 ? 'active' : ''}">
+          <img src="${img}" alt="Project Image ${i + 1}">
+        </div>
+      `).join("");
+      
+      const controls = exp.images.length > 1 ? `
+        <button class="slide-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+        <button class="slide-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+        <div class="slide-dots">
+          ${exp.images.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`).join("")}
+        </div>
+      ` : "";
+
+      slideshowHTML = `
+        <div class="exp-slideshow">
+          ${slides}
+          ${controls}
+        </div>
+      `;
+    }
+
     card.innerHTML = `
             <div class="exp-header">
                 <div>
@@ -88,8 +113,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
                 <div class="exp-period">${exp.period}</div>
             </div>
+            ${slideshowHTML}
             <ul class="exp-list">
-                ${exp.points.map((point) => `<li>${point}</li>`).join("")}
+                ${exp.points.map((point) => {
+                  if (typeof point === 'object' && point !== null) {
+                    let pointSlideshowHTML = "";
+                    if (point.images && point.images.length > 0) {
+                      const pSlides = point.images.map((img, i) => `
+                        <div class="slide ${i === 0 ? 'active' : ''}">
+                          <img src="${img}" alt="Project Image ${i + 1}">
+                        </div>
+                      `).join("");
+                      const pControls = point.images.length > 1 ? `
+                        <button class="slide-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+                        <button class="slide-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+                        <div class="slide-dots">
+                          ${point.images.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" data-index="${i}"></span>`).join("")}
+                        </div>
+                      ` : "";
+                      pointSlideshowHTML = `
+                        <div class="exp-slideshow inline-slideshow">
+                          ${pSlides}
+                          ${pControls}
+                        </div>
+                      `;
+                    }
+                    return `
+                      <li class="inline-project">
+                        <div class="project-content">${point.text}</div>
+                        ${pointSlideshowHTML}
+                      </li>
+                    `;
+                  }
+                  return `<li>${point}</li>`;
+                }).join("")}
             </ul>
         `;
     expList.appendChild(card);
@@ -139,12 +196,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const achList = document.getElementById("achievement-list");
   resumeData.achievements.forEach((ach) => {
     const li = document.createElement("li");
+    
+    let mediaHTML = "";
+    if (ach.media && ach.media.length > 0) {
+      const mediaItems = ach.media.map(file => {
+        const isVideo = file.match(/\.(mp4|webm|ogg)$/i);
+        if (isVideo) {
+          return `<video controls class="ach-media-item"><source src="${file}" type="video/mp4">Your browser does not support the video tag.</video>`;
+        } else {
+          return `<img src="${file}" alt="Achievement Media" class="ach-media-item">`;
+        }
+      }).join("");
+      mediaHTML = `<div class="ach-media-grid">${mediaItems}</div>`;
+    }
+
     li.innerHTML = `
-            <div class="ach-icon"><i class="fas fa-trophy" style="color: var(--accent-color);"></i></div>
-            <div class="ach-text">
-                ${ach.text}
-                ${ach.url ? `<br><a href="${ach.url}" target="_blank" class="ach-link"><i class="fas fa-link"></i> View Presentation</a>` : ""}
+            <div class="ach-header">
+                <div class="ach-icon"><i class="fas fa-trophy" style="color: var(--accent-color);"></i></div>
+                <div class="ach-text">
+                    ${ach.text}
+                    ${ach.url ? `<br><a href="${ach.url}" target="_blank" class="ach-link"><i class="fas fa-link"></i> View Presentation</a>` : ""}
+                </div>
             </div>
+            ${mediaHTML}
         `;
     achList.appendChild(li);
   });
@@ -283,4 +357,32 @@ document.addEventListener("DOMContentLoaded", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
+
+  // Initialize Slideshows
+  document.querySelectorAll('.exp-slideshow').forEach(slideshow => {
+    let currentSlide = 0;
+    const slides = slideshow.querySelectorAll('.slide');
+    const dots = slideshow.querySelectorAll('.dot');
+    const prevBtn = slideshow.querySelector('.slide-prev');
+    const nextBtn = slideshow.querySelector('.slide-next');
+    
+    if (slides.length <= 1) return;
+
+    function goToSlide(index) {
+      slides[currentSlide].classList.remove('active');
+      if (dots[currentSlide]) dots[currentSlide].classList.remove('active');
+      
+      currentSlide = (index + slides.length) % slides.length;
+      
+      slides[currentSlide].classList.add('active');
+      if (dots[currentSlide]) dots[currentSlide].classList.add('active');
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+    if (nextBtn) nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+    
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.index)));
+    });
+  });
 });
