@@ -138,9 +138,26 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                       `;
                     }
+                    let demoHTML = "";
+                    if (point.demo && point.demo.url) {
+                      demoHTML = `
+                        <div class="live-demo">
+                          <div class="live-demo-actions">
+                            <button type="button" class="demo-btn demo-toggle" data-embed="${point.demo.embedUrl || point.demo.url}">
+                              <i class="fas fa-play-circle"></i> <span>Try Live Demo</span>
+                            </button>
+                            <a class="demo-btn demo-link" href="${point.demo.url}" target="_blank" rel="noopener noreferrer">
+                              <i class="fas fa-external-link-alt"></i> Open on Hugging Face
+                            </a>
+                          </div>
+                          <div class="live-demo-frame" hidden></div>
+                        </div>
+                      `;
+                    }
                     return `
                       <li class="inline-project">
                         <div class="project-content">${point.text}</div>
+                        ${demoHTML}
                         ${pointSlideshowHTML}
                       </li>
                     `;
@@ -150,6 +167,24 @@ document.addEventListener("DOMContentLoaded", () => {
             </ul>
         `;
     expList.appendChild(card);
+  });
+
+  // Live demo toggles (lazy-load iframe on first open)
+  document.querySelectorAll(".demo-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const frameWrap = btn.closest(".live-demo").querySelector(".live-demo-frame");
+      const label = btn.querySelector("span");
+      if (frameWrap.hidden) {
+        if (!frameWrap.querySelector("iframe")) {
+          frameWrap.innerHTML = `<iframe src="${btn.dataset.embed}" title="Live Demo" loading="lazy" allow="camera; clipboard-write" frameborder="0"></iframe>`;
+        }
+        frameWrap.hidden = false;
+        label.textContent = "Hide Live Demo";
+      } else {
+        frameWrap.hidden = true;
+        label.textContent = "Try Live Demo";
+      }
+    });
   });
 
   // Populate Skills

@@ -73,6 +73,10 @@ export const resumeData = {
         },
         {
           text: "<strong>Advanced UAV & ERI Bridge and Roadway Inspection Pipeline:</strong> Led extensive fieldwork to implement a multi-modal structural health monitoring system focused on pavement and concrete analytics. Operated custom Unmanned Aerial Vehicle (UAV) fleets alongside Electrical Resistivity Imaging (ERI) to gather real-world field data. This dual-domain approach successfully mapped surface cracking geometry and subsurface moisture anomalies across critical concrete bridge decks and asphalt infrastructure, establishing a robust pipeline for real-world pavement degradation analysis.",
+          demo: {
+            url: "https://huggingface.co/spaces/FyazNafin/crack-detection",
+            embedUrl: "https://fyaznafin-crack-detection.hf.space"
+          },
           images: [
             "assets/Advanced UAV & ERI Bridge and Roadway Inspection Pipeline/WhatsApp Image 2026-10-01 at 10.04.55 PM.jpeg",
             "assets/Advanced UAV & ERI Bridge and Roadway Inspection Pipeline/WhatsApp Image 2026-10-01 at 10.06.21 PM.jpeg",
